@@ -1,0 +1,41 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20
+  },
+  "configurePresets": [
+    {
+      "name": "pico-release",
+      "displayName": "Pico (Release)",
+      "generator": "Ninja",
+      "binaryDir": "build/pico-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PICO_BOARD": "pico",
+        "PICO_PLATFORM": "rp2040"
+      }
+    },
+    {
+      "name": "pico-debug",
+      "displayName": "Pico (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "build/pico-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PICO_BOARD": "pico",
+        "PICO_PLATFORM": "rp2040"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "pico-release",
+      "configurePreset": "pico-release"
+    },
+    {
+      "name": "pico-debug",
+      "configurePreset": "pico-debug"
+    }
+  ]
+}

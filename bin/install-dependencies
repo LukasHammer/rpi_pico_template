@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -e
+
+echo "=== Raspberry Pi Pico development environment setup ==="
+
+# 1. Update package list
+sudo apt update
+
+# 2. Install basic build dependencies
+sudo apt install -y git cmake build-essential libusb-1.0-0-dev python3 python3-pip
+
+# 3. Install additional dependencies for Pico SDK
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+
+# 3. Build and install picotool
+PROJECT_ROOT=$(cd "$(dirname "$0")" && pwd)
+PICOTOOL_DIR="$HOME/picotool"
+
+if [ ! -d "$PICOTOOL_DIR" ]; then
+    git clone https://github.com/raspberrypi/picotool.git "$PICOTOOL_DIR"
+fi
+
+echo "Building picotool..."
+mkdir -p "$PICOTOOL_DIR/build"
+cd "$PICOTOOL_DIR/build"
+cmake -DPICO_SDK_PATH="$PROJECT_ROOT/../libs/pico-sdk" ..
+make
+sudo cmake --install .
+cd -
+
+echo "picotool installed"
+
+# 4. Add udev rules for RP2040 / Pico
+UDEV_RULES_TARGET_PATH="/etc/udev/rules.d/"
+UDEV_RULE_SRC_FILE="$PICOTOOL_DIR/udev/60-picotool.rules"
+echo "Adding udev rules for Raspberry Pi Pico"
+
+if [ -f "$UDEV_RULE_SRC_FILE" ]; then
+    sudo cp "$UDEV_RULE_SRC_FILE" "$UDEV_RULES_TARGET_PATH"
+else
+    echo "Warning: $UDEV_RULE_SRC_FILE not found, skipping udev rules"
+fi
+
+
+# Reload udev rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+echo "Udev rules installed for Pico. You may need to unplug and replug your Pico."
+
+# 5. Install Python packages often needed for Pico projects
+pip3 install --user cmake pyserial
+
+echo "=== Raspberry Pi Pico development environment setup complete ==="
+echo "Your project already includes the Pico SDK as a submodule, so no separate clone is needed."
